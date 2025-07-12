@@ -1,0 +1,65 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  #player, iframe, video {
+    width: 100vw;
+    height: 100vh;
+    border: none;
+    background: #000;
+  }
+  #blockMessage {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    z-index: 9999;
+    display: none;
+  }
+</style>
+<div id="blockMessage">Screen recording or screenshot is blocked</div>
+<div id="player"></div>
+<script src="https://cdn.jsdelivr.net/npm/@faisalman/ua-parser-js@1.0.2/src/ua-parser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/blockscreen@1.0.4/blockscreen.min.js"></script>
+<script>
+  const url = localStorage.getItem('video_url');
+  if (!url) location.href = 'index.html';
+  const player = document.getElementById('player');
+  if (url.includes('youtube.com') || url.includes('youtu.be')) {
+    const videoId = url.includes('youtu.be') ? url.split('/').pop() : new URL(url).searchParams.get('v');
+    player.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&controls=1&modestbranding=1&rel=0&disablekb=1&iv_load_policy=3" allowfullscreen></iframe>`;
+  } else if (url.includes('drive.google.com')) {
+    const fileId = url.match(/[-\w]{25,}/);
+    if (fileId) player.innerHTML = `<iframe src="https://drive.google.com/file/d/${fileId[0]}/preview" allowfullscreen></iframe>`;
+  } else {
+    player.innerHTML = `<video src="${url}" controls autoplay></video>`;
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'PrintScreen' || (e.ctrlKey && e.key.toLowerCase() === 's')) {
+      e.preventDefault();
+      document.getElementById('blockMessage').style.display = 'flex';
+    }
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      document.getElementById('blockMessage').style.display = 'flex';
+    }
+  });
+  if (window.BlockScreen) {
+    BlockScreen.preventRecording({ onDetected: () => {
+      document.getElementById('blockMessage').style.display = 'flex';
+    }});
+  }
+</script>

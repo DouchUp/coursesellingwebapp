@@ -1,0 +1,59 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="loader.css">
+<script src="https://kit.fontawesome.com/8aa17a250d.js" crossorigin="anonymous"></script>
+<style>
+  .header { padding: 10px; text-align: center; border-radius: 0 0 25px 25px; }
+  .context { display: flex; flex-direction: column; }
+  .play { width: 50px; height: 50px; background: #382fe3; color: #fff; font-size: 20px; display: flex; align-items: center; justify-content: center; border-radius: 125px; border: none; }
+  i { overflow: hidden; font-size: 24px; text-align: center; }
+  #content > div { display: flex; align-items: center; justify-content: space-between; padding: 10px; margin: 0 10px; border-bottom: 1px solid; }
+  #content > div { background: #047a7e; border-radius: 8px 125px 125px 8px; padding: 10px 10px 10px 15px; border-bottom: none; }
+  #content { display: flex; flex-direction: column; gap: 15px; color: #fff; margin: 20px 0 0 0; }
+  @media only screen and (min-width: 768px) {
+    body { margin: 0 25%; background: #073042; color: #fff; } 
+    #loader { top: 25%; }
+    #content { display: flex; flex-direction: column; gap: 15px; }
+  }
+</style>
+<div class="header">
+  <h2>Chapters</h2>
+</div>
+<div id="loader" style="display: flex;"><div class="loader"></div></div>
+<div id="content"></div>
+<script>
+const scriptURL = 'https://script.google.com/macros/s/AKfycbyfc6rqGY_qWsOc07OZ7O4FYO-wcaCqj55KzEJAmNluAqj3MILcttk7CdR--ZshV4HR/exec';
+const key = localStorage.getItem('secret');
+if (!key) window.location.href = 'login.html';
+
+document.getElementById('loader').style.display = 'flex';
+
+fetch(`${scriptURL}?action=view&key=${key}`)
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById('loader').style.display = 'none';
+    const contentDiv = document.getElementById('content');
+    data.forEach(item => {
+      const card = document.createElement('div');
+      card.innerHTML = `
+      <div class="context">
+        <h3>${item.title}</h3>
+        <p>${item.description}</p>
+      </div>
+      <button class="play"><i class="fa-solid fa-play"></i></button>
+      `;
+      const button = card.querySelector('button');
+      button.addEventListener('click', () => {
+        const url = item.url;
+        if (url.includes('youtube.com') || url.includes('youtu.be') || url.includes('drive.google.com')) {
+          localStorage.setItem('video_url', url);
+          window.location.href = 'lecture.html';
+        } else {
+          window.location.href = url;
+        }
+      });
+      contentDiv.appendChild(card);
+    });
+  });
+</script>
